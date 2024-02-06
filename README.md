@@ -1,2 +1,2 @@
 # Iron-65
-6502 ASM compiler for the NES.
+6502 Assembler for the NES.
