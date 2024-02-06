@@ -1,6 +1,6 @@
 import re
 
-pattern_decimal = re.compile(pattern=r"^(?:0d)?(\d+)$", flags=re.IGNORECASE)
+pattern_decimal = re.compile(pattern=r"^(?:0d)?(\d{1,5})$", flags=re.IGNORECASE)
 pattern_binary = re.compile(pattern=r"^(?:%|0b)((?:[01]{8}){1,2})$", flags=re.IGNORECASE)
 pattern_hexadecimal = re.compile(pattern=r"^(?:0x|\$)((?:[0-9a-f]{2}){1,2})$", flags=re.IGNORECASE)
 
