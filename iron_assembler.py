@@ -1,18 +1,15 @@
 import re
+from typing import Literal
 
 
 class Assembler:
 	def __init__(self, file_path: str):
 		self.main_asm_file = file_path
-		self.text_lines: list[str] = []
 
 	def assemble(self):
+		text_lines = self.preprocess_lines()
 
-		self.preprocess_lines()
-		print("Called assemble!")
-		print(self.text_lines)
-
-	def preprocess_lines(self) -> None:
+	def preprocess_lines(self) -> list[str]:
 		with open(self.main_asm_file) as infile:
 			file_content = infile.read()
 		file_content = file_content.replace(":", ":\n")
@@ -21,7 +18,18 @@ class Assembler:
 			re_match = re.fullmatch(r"(.*?);.*|(.+)", line)
 			if re_match is None:
 				continue
-			processed_line = re_match.group(1) or re_match.group(2)  # One of these is always None
-			if processed_line not in ("", None):
+			processed_line = re_match.group(1) or re_match.group(2) or ""  # One of these is always None
+			processed_line = processed_line.strip()
+			if processed_line != "":
 				out_lines.append(processed_line)
-		self.text_lines = out_lines
+		return out_lines
+
+
+class VirtualCartridge:
+	def __init__(self):
+		self.prg_size: list[int] = [2]
+		self.prg_size_mode: Literal["LIN", "EXP"] = "LIN"
+		self.chr_size: list[int] = [2]
+		self.chr_size_mode: Literal["LIN", "EXP"] = "LIN"
+		self.nametable_mode: Literal["VERTICAL", "HORIZONTAL", "MAPPER"]
+
