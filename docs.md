@@ -43,11 +43,11 @@ starting with a letter. They may not share a name with a symbol, and are case-in
 
 More details about the NES 2.0 Header can be found [here](https://www.nesdev.org/wiki/NES_2.0).
 
-## `!OUTFILE`
+## `!OUT_FILE`
 
 Configure the final name of the assembled file. If left unspecified, it is inferred based on the input file.
 
-Syntax: `!OUTFILE <name>`
+Syntax: `!OUT_FILE <name>`
 
 `name` is the final name of the file. It should usually end in `.nes`.
 It will be placed in `/output/`.
@@ -136,16 +136,16 @@ Syntax: `!TRAINER <path>`
 
 What type of console this game is for. Defaults to `!CONSOLE_TYPE NES`.
 
-Syntax: `!CONSOLE_TYPE <type>` or `!CONSOLE_TYPE VSSYSTEM <ppu> <hardware>`.
+Syntax: `!CONSOLE_TYPE <type>` or `!CONSOLE_TYPE VS_SYSTEM <ppu> <hardware>`.
 
-`type` is any of `NES`, `FAMICOM`, `DENDY`, `VSSYSTEM`, `PLAYCHOICE_10`, `FAMICLONE_DECIMAL`, `NES_EPSM`,
+`type` is any of `NES`, `FAMICOM`, `DENDY`, `VS_SYSTEM`, `PLAYCHOICE_10`, `FAMICLONE_DECIMAL`, `NES_EPSM`,
 `FAMICOM_EPSM`, `VT01`, `VT02`, `VT03`, `VT09`, `VT32`, `VT369`, `UM6578`, or `FAMICOM_NETWORK`.
 
 Read more [here](https://www.nesdev.org/wiki/NES_2.0#Extended_Console_Type).
 
 ### Vs. System configuration
 
-If `!CONSOLE_TYPE` is `VSSYSTEM`, two more parameters are required.
+If `!CONSOLE_TYPE` is `VS_SYSTEM`, two more parameters are required.
 
 `ppu` is one of `RP2C03B`, `RP2C03G`, `RP2C04-0001`, `RP2C04-0002`, `RP2C04-0003`, `RP2C04-0004`, `RC2C03B`, `RC2C03C`,
 `RC2C05-01`, `RC2C05-02`, `RC2C05-03`, `RC2C05-04`, or `RC2C05-05`.
