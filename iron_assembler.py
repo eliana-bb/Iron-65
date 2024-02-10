@@ -45,9 +45,7 @@ class VirtualCartridge:
 
 	def __init__(self):
 		self.prg_size: list[int] = [2]
-		self.prg_size_mode: str = "LIN"
 		self.chr_size: list[int] = [2]
-		self.chr_size_mode: str = "LIN"
 		self.mirror_mode: str = "HORIZONTAL"
 		self.mapper: int = 0
 		self.submapper: int = 0
@@ -60,3 +58,6 @@ class VirtualCartridge:
 		self.byte_13: int = 0
 		self.misc_roms: int = 0
 		self.default_device: int = 1
+
+	def config_cartridge(self, header_config: str) -> None:
+		pass
