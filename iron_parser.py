@@ -55,6 +55,21 @@ class Parser:
 
 	def parse_labels(self):
 		cursor_pos = 0
+		for token in self.token_list:
+			match token.type:
+				case "LABEL":
+					self.sym_lib.add_label(token.content, cursor_pos)
+				case "RAW_DATA":
+					args = token.content.split(" ")
+					if args[0] in [".B", ".BYTE", ".BYTES"]:
+						cursor_pos += len(args) - 1
+					elif args[0] in [".W", ".WORD", ".WORDS"]:
+						cursor_pos += 2 * (len(args) - 1)
+					elif args[0] == ".PAD":
+						cursor_pos = read(args[1])
+				case "OPCODE":
+					addr_mode = self.parse_addr_mode(token.content)
+					cursor_pos += self._ADDR_MODE_LENGTHS[addr_mode]
 
 
 class Symbol_Library:
@@ -81,6 +96,12 @@ class Symbol_Library:
 	def _add_symbol(self, declaration: str) -> None:
 		this_symbol = Symbol(declaration)
 		self.symbols[this_symbol.name] = this_symbol
+
+	def add_label(self, declaration: str, pos: int) -> None:
+		this_label = Label(declaration, pos)
+		if this_label.name == "":
+			self.anon_labels.append(this_label)
+		self.labels[this_label.name] = this_label
 
 
 class Symbol:
