@@ -1,5 +1,7 @@
 import re
 from typing import Union
+import iron_token
+import iron_parser
 from number_reader import read
 
 
@@ -8,7 +10,15 @@ class Assembler:
 		self.main_asm_file = file_path
 
 	def assemble(self):
-		text_lines = self.preprocess_lines()
+		virtual_cart = VirtualCartridge()
+		text_lines = self.preprocess_lines()  # Do things like removing comments, special-case line splitting, etc.
+		tokenizer = iron_token.Tokenizer(text_lines)
+		all_tokens = tokenizer.tokens
+		cart_config_strings = [token.content for token in all_tokens if token.type == "CART_CONFIG"]
+		virtual_cart.config_cart(cart_config_strings)
+		all_tokens = [token for token in all_tokens if token.type != "CART_CONFIG"]
+		sym_lib = iron_parser.Symbol_Library()
+
 
 	def preprocess_lines(self) -> list[str]:
 		with open(self.main_asm_file) as infile:
@@ -64,7 +74,11 @@ class VirtualCartridge:
 		self.out_file = ""
 		self.chr_file = ""
 
-	def config_cartridge(self, config_str: str) -> None:
+	def config_cart(self, conf_list: list[str]) -> None:
+		for i in conf_list:
+			self._config_cartridge(i)
+
+	def _config_cartridge(self, config_str: str) -> None:
 		config_args = config_str.upper().strip().split(" ")
 		match config_args[0]:
 			case "!OUT_FILE":
