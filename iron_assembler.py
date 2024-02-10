@@ -97,17 +97,17 @@ class VirtualCartridge:
 				else:
 					self.chr_size = [read(config_args[1]), read(config_args[2])]
 			case "!MIRROR_MODE":
-				self.mirror_mode = VirtualCartridge._NAMETABLE_MIRROR_MODES[config_args[1]]
+				self.mirror_mode = self._NAMETABLE_MIRROR_MODES[config_args[1]]
 			case "!BATTERY":
 				self.battery = (config_args[1] == "TRUE")
 			case "!TRAINER":
 				self.trainer = "" if config_args[1] == "FALSE" else config_args[1]
 			case "!CONSOLE_TYPE":
-				console_type = VirtualCartridge._CONSOLE_TYPES[config_args[1]]
+				console_type = self._CONSOLE_TYPES[config_args[1]]
 				if console_type == 1:
 					self.byte_13 = (
-							VirtualCartridge._VS_SYSTEM_PPUS[config_args[2]] |
-							VirtualCartridge._VS_SYSTEM_HTYPES[config_args[3]]
+							self._VS_SYSTEM_PPUS[config_args[2]] |
+							self._VS_SYSTEM_HTYPES[config_args[3]]
 					)
 				if console_type >= 3:
 					self.console_type_7 = 3
@@ -128,7 +128,7 @@ class VirtualCartridge:
 			case "!CHR_NVRAM_SIZE":
 				self.chr_nvram_shifts = read(config_args[1])
 			case "!REGION":
-				self.region = VirtualCartridge._REGIONS[config_args[1]]
+				self.region = self._REGIONS[config_args[1]]
 			case "!MISC_ROMS":
 				if config_args[1] == "FALSE":
 					self.misc_roms = []
