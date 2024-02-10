@@ -1,5 +1,5 @@
 import re
-from typing import Literal
+from typing import Union
 from number_reader import read
 
 
@@ -30,34 +30,94 @@ class VirtualCartridge:
 	_NAMETABLE_MIRROR_MODES = {"VERTICAL": 0, "HORIZONTAL": 1, "MAPPER": 0b1000}
 	_REGIONS = {"NTSC": 0, "PAL": 1, "MULTI": 2, "DENDY": 3}
 	_VS_SYSTEM_PPUS = {
-		"RP2C03B": 0, "RP2C03G": 1, "RP2C04-0001": 2, "RP2C04-0002": 3, "RP2C04-0003": 4, "RP2C04-0004": 5,
-		"RC2C03B": 6, "RC2C03C": 7, "RC2C05-01": 8, "RC2C05-02": 9, "RC2C05-03": 10, "RC2C05-04": 11, "RC2C05-05": 12
+		"RP2C03B": 0x00, "RP2C03G": 0x10, "RP2C04-0001": 0x20, "RP2C04-0002": 0x30, "RP2C04-0003": 0x40,
+		"RP2C04-0004": 0x50, "RC2C03B": 0x60, "RC2C03C": 0x70, "RC2C05-01": 0x80, "RC2C05-02": 0x90, "RC2C05-03": 0xA0,
+		"RC2C05-04": 0xB0, "RC2C05-05": 0xC0
 	}
 	_VS_SYSTEM_HTYPES = {
 		"NORMAL": 0, "RBI_BASEBALL": 1, "TKO_BOXING": 2, "SUPER_XEVIOUS": 3, "VS_ICE_CLIMBER": 4, "DUAL": 5,
 		"DUAL_BUNGELING": 6
 	}
 	_CONSOLE_TYPES = {
-		"NES": 0, "FAMICOM": 0, "DENDY": 0, "VSSYSTEM": 1, "PLAYCHOICE_10": 2, "FAMICLONE_DECIMAL": 3, "NES_EPSM": 4,
+		"NES": 0, "FAMICOM": 0, "DENDY": 0, "VS_SYSTEM": 1, "PLAYCHOICE_10": 2, "FAMICLONE_DECIMAL": 3, "NES_EPSM": 4,
 		"FAMICOM_EPSM": 4, "VT01": 5, "VT02": 6, "VT03": 7, "VT09": 8, "VT32": 9, "VT369": 10, "UM6578": 11,
 		"FAMICOM_NETWORK": 12
 	}
 
-	def __init__(self):
+	def __init__(self) -> None:
 		self.prg_size: list[int] = [2]
-		self.chr_size: list[int] = [2]
-		self.mirror_mode: str = "HORIZONTAL"
-		self.mapper: int = 0
-		self.submapper: int = 0
-		self.console_type: str = "NES"
+		self.chr_size: list[int] = [1]
+		self.mirror_mode: int = 1
+		self.battery: bool = False
+		self.trainer: str = ""
+		self.mapper: list[int] = [0, 0]
+		self.console_type_7: int = 0
 		self.prg_ram_shifts: int = 0
 		self.prg_nvram_shifts: int = 0
 		self.chr_ram_shifts: int = 0
 		self.chr_nvram_shifts: int = 0
-		self.region: str = "NTSC"
+		self.region: int = 0
 		self.byte_13: int = 0
-		self.misc_roms: int = 0
+		self.misc_roms: list[str] = []
 		self.default_device: int = 1
 
-	def config_cartridge(self, header_config: str) -> None:
-		pass
+		self.out_file = ""
+		self.chr_file = ""
+
+	def config_cartridge(self, config_str: str) -> None:
+		config_args = config_str.upper().strip().split(" ")
+		match config_args[0]:
+			case "!OUT_FILE":
+				self.out_file = config_args[1]
+			case "!CHR_FILE":
+				self.chr_file = config_args[1]
+			case "!PRG_SIZE":
+				if len(config_args) == 2:
+					self.prg_size = [read(config_args[1])]
+				else:
+					self.prg_size = [read(config_args[1]), read(config_args[2])]
+			case "!CHR_SIZE":
+				if len(config_args) == 2:
+					self.chr_size = [read(config_args[1])]
+				else:
+					self.chr_size = [read(config_args[1]), read(config_args[2])]
+			case "!MIRROR_MODE":
+				self.mirror_mode = VirtualCartridge._NAMETABLE_MIRROR_MODES[config_args[1]]
+			case "!BATTERY":
+				self.battery = (config_args[1] == "TRUE")
+			case "!TRAINER":
+				self.trainer = "" if config_args[1] == "FALSE" else config_args[1]
+			case "!CONSOLE_TYPE":
+				console_type = VirtualCartridge._CONSOLE_TYPES[config_args[1]]
+				if console_type == 1:
+					self.byte_13 = (
+							VirtualCartridge._VS_SYSTEM_PPUS[config_args[2]] |
+							VirtualCartridge._VS_SYSTEM_HTYPES[config_args[3]]
+					)
+				if console_type >= 3:
+					self.console_type_7 = 3
+					self.byte_13 = console_type
+				else:
+					self.console_type_7 = console_type
+					self.byte_13 = 0
+			case "!MAPPER":
+				self.mapper[0] = read(config_args[1])
+				if len(config_args) == 3:
+					self.mapper[1] = read(config_args[2])
+			case "!PRG_RAM_SIZE":
+				self.prg_ram_shifts = read(config_args[1])
+			case "!PRG_NVRAM_SIZE":
+				self.prg_nvram_shifts = read(config_args[1])
+			case "!CHR_RAM_SIZE":
+				self.chr_ram_shifts = read(config_args[1])
+			case "!CHR_NVRAM_SIZE":
+				self.chr_nvram_shifts = read(config_args[1])
+			case "!REGION":
+				self.region = VirtualCartridge._REGIONS[config_args[1]]
+			case "!MISC_ROMS":
+				if config_args[1] == "FALSE":
+					self.misc_roms = []
+				else:
+					self.misc_roms = config_args[1:]
+			case "!DEFAULT_DEVICE":
+				self.default_device = read(config_args[1])
