@@ -19,20 +19,21 @@ class Assembler:
 		all_tokens = [token for token in all_tokens if token.type != "CART_CONFIG"]
 		sym_lib = iron_parser.Symbol_Library()
 
-
 	def preprocess_lines(self) -> list[str]:
+		"""
+		Returns a list of strings, with whitespaces collapsed, comments removed, all uppercased, with no empty lines.
+		"""
 		with open(self.main_asm_file) as infile:
 			file_content = infile.read()
-		file_content = file_content.replace(":", ":\n")
+		file_content = file_content.replace(":", ":\n")  # add extra newlines after labels
 		out_lines = []
 		for line in file_content.split("\n"):
-			re_match = re.fullmatch(r"(.*?);.*|(.+)", line)
-			if re_match is None:
+			processed_line = line.upper().split(";")[0].strip()  # Removes comments, uppercases, strips whitespace
+			if processed_line == "":
 				continue
-			processed_line = re_match.group(1) or re_match.group(2) or ""  # One or both are always None
-			processed_line = processed_line.strip()
-			if processed_line != "":
-				out_lines.append(processed_line)
+			processed_line = re.sub(r"[ \t]+", " ", processed_line)
+			print(processed_line)
+			out_lines.append(processed_line)
 		return out_lines
 
 
