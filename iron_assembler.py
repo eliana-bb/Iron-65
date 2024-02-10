@@ -19,7 +19,7 @@ class Assembler:
 			re_match = re.fullmatch(r"(.*?);.*|(.+)", line)
 			if re_match is None:
 				continue
-			processed_line = re_match.group(1) or re_match.group(2) or ""  # One of these is always None
+			processed_line = re_match.group(1) or re_match.group(2) or ""  # One or both are always None
 			processed_line = processed_line.strip()
 			if processed_line != "":
 				out_lines.append(processed_line)
