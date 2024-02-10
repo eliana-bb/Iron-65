@@ -21,37 +21,37 @@ class Parser:
 		self.sym_lib.add_symbols(sym_dec_list)
 		self.sym_lib = [token for token in self.token_list if token.type != "SYMBOL"]
 
-	def parse_addr_mode(self, opcode: str) -> str:
+	def parse_addr_mode(self, opcode: str) -> tuple[str, str]:
 		split_code = opcode.split(" ")
 		if len(split_code) == 1:
-			return "IMPLIED"
+			return "IMPLIED", ""
 		if split_code[0] in ("BCC", "BCS", "BEQ", "BMI", "BNE", "BPL", "BVC", "BVS"):
-			return "RELATIVE"
+			return "RELATIVE", split_code[1]
 		arg = split_code[1].strip().upper()
 		if arg == "A":
-			return "ACCUMULATOR"
+			return "ACCUMULATOR", "A"
 		if arg[0] == "#":
-			return "IMMEDIATE"
+			return "IMMEDIATE", arg[1:]
 		if re.fullmatch(r"\(.+,X\)", arg):
-			return "X_INDIRECT"
+			return "X_INDIRECT", arg[1:-3]
 		if re.fullmatch(r"\(.+\),Y", arg):
-			return "INDIRECT_Y"
+			return "INDIRECT_Y", arg[1:-3]
 		if re.fullmatch(r"\(.+\)", arg):
-			return "INDIRECT"
+			return "INDIRECT", arg[1:-1]
 		if arg[-2:] == ",X":
 			val = self.sym_lib.get_value(arg[:-2])
 			if 0 <= val <= 0xFF:
-				return "ZERO_PAGE_X"
-			return "ABSOLUTE_X"
+				return "ZERO_PAGE_X", arg[:-2]
+			return "ABSOLUTE_X", arg[:-2]
 		if arg[-2:] == ",Y":
 			val = self.sym_lib.get_value(arg[:-2])
 			if 0 <= val <= 0xFF:
-				return "ZERO_PAGE_Y"
-			return "ABSOLUTE_Y"
+				return "ZERO_PAGE_Y", arg[:-2]
+			return "ABSOLUTE_Y", arg[:-2]
 		val = self.sym_lib.get_value(arg)
 		if 0 <= val <= 0xFF:
-			return "ZERO_PAGE"
-		return "ABSOLUTE"
+			return "ZERO_PAGE", arg
+		return "ABSOLUTE", arg
 
 	def parse_labels(self):
 		cursor_pos = 0
@@ -68,7 +68,7 @@ class Parser:
 					elif args[0] == ".PAD":
 						cursor_pos = read(args[1])
 				case "OPCODE":
-					addr_mode = self.parse_addr_mode(token.content)
+					addr_mode = self.parse_addr_mode(token.content)[0]
 					cursor_pos += self._ADDR_MODE_LENGTHS[addr_mode]
 
 
