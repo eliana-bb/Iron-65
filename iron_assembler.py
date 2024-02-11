@@ -17,7 +17,7 @@ class Assembler:
 		cart_config_strings = [token.content for token in all_tokens if token.type == "CART_CONFIG"]
 		virtual_cart.config_cart(cart_config_strings)
 		all_tokens = [token for token in all_tokens if token.type != "CART_CONFIG"]
-		sym_lib = iron_parser.Symbol_Library()
+		parser = iron_parser.Parser(all_tokens)
 
 	def preprocess_lines(self) -> list[str]:
 		"""
