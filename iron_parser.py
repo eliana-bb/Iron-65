@@ -15,11 +15,12 @@ class Parser:
 		self.byte_obj_list: list[bytes] = []
 
 		self.parse_symbols()
+		self.parse_labels()
 
 	def parse_symbols(self):
 		sym_dec_list = [token.content for token in self.token_list if token.type == "SYMBOL"]
 		self.sym_lib.add_symbols(sym_dec_list)
-		self.sym_lib = [token for token in self.token_list if token.type != "SYMBOL"]
+		self.token_list = [token for token in self.token_list if token.type != "SYMBOL"]
 
 	def parse_addr_mode(self, opcode: str) -> tuple[str, str]:
 		split_code = opcode.split(" ")
@@ -70,6 +71,7 @@ class Parser:
 				case "OPCODE":
 					addr_mode = self.parse_addr_mode(token.content)[0]
 					cursor_pos += self._ADDR_MODE_LENGTHS[addr_mode]
+		self.token_list = [token for token in self.token_list if token.type != "LABEL"]
 
 
 class Symbol_Library:
