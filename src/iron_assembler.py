@@ -198,7 +198,7 @@ class VirtualCartridge:
 			self.out_file = "".join(self.prg_file.removeprefix("input/").split(".")[:-1]) + ".nes"
 		self.out_file = self.out_file.lower()
 		if self.chr_file == "":
-			for file in os.listdir("input"):
+			for file in os.listdir("../input"):
 				if file.endswith(".chr"):
 					self.chr_file = file
 					break
