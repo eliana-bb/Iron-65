@@ -189,7 +189,7 @@ class Parser:
                         arg_val = read(token.content.split(" ")[1])
                         arg_bytes = arg_val.to_bytes(length=1, signed=True)
                     except ValueError:
-                        arg_bytes = self.sym_lib.get_relative(cursor_pos+2, token.content.split(" ")[1])
+                        arg_bytes = self.sym_lib.get_relative(cursor_pos + 2, token.content.split(" ")[1])
                 elif addr_mode not in ["IMPLIED", "ACCUMULATOR"]:
                     arg_bytes = self.sym_lib.get_bytes(argument)
                 opc_bytes = instruction_byte + arg_bytes
@@ -218,12 +218,13 @@ class Symbol_Library:
                     anon_offset += 1
                 else:
                     raise ValueError(f"Disallowed character {char} in anonymous label reference!")
-            if anon_offset < 0:
-                anon_offset += 1
+            if anon_offset > 0:
+                anon_offset -= 1
             current_anon_region = 0
-            while (current_pos > self.anon_labels[current_anon_region].short_addr and
-                   current_anon_region < len(self.anon_labels)):
+            while current_pos > self.anon_labels[current_anon_region].short_addr:
                 current_anon_region += 1
+                if current_anon_region >= len(self.anon_labels):
+                    break
             target_label = self.anon_labels[current_anon_region + anon_offset]
         else:
             target_label = self.labels[label_name]
@@ -310,7 +311,7 @@ class Symbol:
 
 class Label:
     def __init__(self, declare_str: str, pos: int) -> None:
-        self.name = declare_str[:-1]
+        self.name = declare_str.split(":")[0]
         self.short_addr = pos
         self.absolute_addr = 0x8000 + (self.short_addr & 0x7FFF)
 
