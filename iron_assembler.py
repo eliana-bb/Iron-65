@@ -18,8 +18,7 @@ class Assembler:
         virtual_cart.config_cart(cart_config_strings)
         all_tokens = [token for token in all_tokens if token.type != "CART_CONFIG"]
         parser = iron_parser.Parser(all_tokens)
-        for i in parser.byte_obj_list:
-            print(len(i))
+        virtual_cart.initialize_prg()
 
     def preprocess_lines(self) -> list[str]:
         """
@@ -75,6 +74,8 @@ class VirtualCartridge:
 
         self.out_file = ""
         self.chr_file = ""
+
+        self.prg = bytearray(0)
 
     def config_cart(self, conf_list: list[str]) -> None:
         for i in conf_list:
@@ -137,3 +138,9 @@ class VirtualCartridge:
                     self.misc_roms = config_args[1:]
             case "!DEFAULT_DEVICE":
                 self.default_device = read(config_args[1])
+
+    def initialize_prg(self) -> None:
+        if len(self.prg_size) == 1:
+            self.prg = bytearray(self.prg_size[0] << 14)
+        else:
+            pass
