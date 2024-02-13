@@ -12,20 +12,11 @@ In hexadecimal: `$##` or `0x##`, where `#` is a hex digit. Must be either 2 or 4
 # Symbols
 
 Symbols are declared in the form `SYM_NAME = number`. `SYM_NAME` can be any string of letters, numbers, and underscores,
-starting with a letter. `number` is any number. Spaces around `=` are optional.
-
-Symbol references are case-insensitive; `PPUDATA` and `ppudata` resolve to the same thing, but `PPUDATA` and `PPU_DATA`
-do not.
+starting with a letter. `number` is any number. Spaces around `=` are optional. Symbols may not share their name with a
+label, and are case-insensitive.
 
 Symbols are referenced within opcodes by inserting them directly, including any characters denoting addressing mode.
 For example, the following statements are equivalent:
-
-```
-LDA $44
-
-Mario_xpos = $44
-LDA Mario_xpos
-```
 
 ```
 LDA #$44
@@ -34,10 +25,32 @@ Mario_height = $44
 LDA #Mario_height
 ```
 
+For a word-sized (e.g. value greater than `0xFF`) symbol, you can also reference high and low bytes with `>` and `<`,
+respectively.
+
+```
+PPUDATA = $2007
+LDA >PPUDATA ; same as LDA $20
+```
+
 # Labels
 
 Labels are declared in the form `LABEL_NAME:`. `LABEL_NAME` can be any string of letters, numbers, and underscores,
 starting with a letter. They may not share a name with a symbol, and are case-insensitive.
+
+## Anonymous labels
+
+You can declare a label without a name, and reference them with `:<offset>`, where `<offset>` is a string of pluses or
+minuses.
+
+They're easy, but bad for readability and maintenance, so should be used sparingly.
+
+```
+:
+INX
+BPL :-  ; the '-' here means "move one anonymous label backwards"
+BMI :+  ; And here, the '+' is "one anonymous label forwards"
+```
 
 # Virtual Cartridge Configuration
 
