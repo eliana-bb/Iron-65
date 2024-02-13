@@ -195,7 +195,7 @@ class VirtualCartridge:
 
 	def save(self) -> None:
 		if self.out_file == "":
-			self.out_file = "".join(self.prg_file.removeprefix("input/").split(".")[:-1]) + ".nes"
+			self.out_file = "".join(self.prg_file.removeprefix("../input/").split(".")[:-1]) + ".nes"
 		self.out_file = self.out_file.lower()
 		if self.chr_file == "":
 			for file in os.listdir("../input"):
@@ -204,14 +204,14 @@ class VirtualCartridge:
 					break
 		if self.chr_file == "":
 			raise FileNotFoundError("CHR file unspecified!")
-		with open("output/" + self.out_file, mode="wb") as out_file:
+		with open("../output/" + self.out_file, mode="wb") as out_file:
 			out_file.write(self.header())
 			if self.trainer != "":
-				with open("input/" + self.trainer, mode="rb") as trainer_file:
+				with open("../input/" + self.trainer, mode="rb") as trainer_file:
 					out_file.write(trainer_file.read())
 			out_file.write(self.prg)
-			with open("input/" + self.chr_file, mode="rb") as chr_file:
+			with open("../input/" + self.chr_file, mode="rb") as chr_file:
 				out_file.write(chr_file.read())
 			for misc_rom in self.misc_roms:
-				with open("input/" + misc_rom, mode="rb") as misc_file:
+				with open("../input/" + misc_rom, mode="rb") as misc_file:
 					out_file.write(misc_file.read())

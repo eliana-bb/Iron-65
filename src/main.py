@@ -8,7 +8,7 @@ import os
 def main():
     for file in os.listdir("../input"):
         if file.endswith(".asm") or file.endswith(".s"):
-            in_fp = "input/" + file
+            in_fp = "../input/" + file
             break
     else:
         raise FileNotFoundError("Can't find source file!")
