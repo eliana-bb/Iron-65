@@ -195,7 +195,7 @@ class VirtualCartridge:
 
 	def save(self) -> None:
 		if self.out_file == "":
-			self.out_file = "".join(self.prg_file.split(".")[:-1]) + ".nes"
+			self.out_file = "".join(self.prg_file.removeprefix("input/").split(".")[:-1]) + ".nes"
 		self.out_file = self.out_file.lower()
 		if self.chr_file == "":
 			for file in os.listdir("input"):
