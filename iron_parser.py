@@ -165,7 +165,7 @@ class Parser:
                         cursor_pos += 1
                         byte = self.sym_lib.get_bytes(byte_reference)
                         if len(byte) > 1:
-                            raise ValueError(f"Reference {byte_reference} value {int(byte)} too large for BYTE call!")
+                            raise ValueError(f"Reference {byte_reference} value {byte} too large for BYTE call!")
                         self.byte_obj_list.append(byte)
                 elif raw_args[0] in [".W", ".WORD", ".WORDS"]:
                     for word_reference in raw_args[1:]:
@@ -282,7 +282,7 @@ class Symbol_Library:
             return this_label.get_word()
         else:
             val = read(string_val)
-            if val >= 0xFF:
+            if val > 0xFF:
                 return val.to_bytes(2, "little")
             return val.to_bytes()
 
