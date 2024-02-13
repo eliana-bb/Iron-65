@@ -26,7 +26,7 @@ class Assembler:
         """
         with open(self.main_asm_file) as infile:
             file_content = infile.read()
-        file_content = file_content.replace(":", ":\n")  # add extra newlines after labels
+        file_content = re.sub(pattern=r":([^+-])", repl=r":\g<1>\n", string=file_content)
         out_lines = []
         for line in file_content.split("\n"):
             processed_line = line.upper().split(";")[0].strip()  # Removes comments, uppercases, strips whitespace
