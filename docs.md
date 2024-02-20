@@ -69,7 +69,7 @@ It will be placed in `/output/`.
 
 Configure the size of the PRG-ROM. Defaults to `!PRG_SIZE 2`.
 
-Syntax: `!PRG_SIZE <units>` or `.PRG_SIZE <multiplier> <shifts>`
+Syntax: `!PRG_SIZE <units>` or `!PRG_SIZE <multiplier> <shifts>`
 
 ### Linear Mode
 
@@ -88,7 +88,7 @@ expressed in linear mode.
 
 Configure the size of the CHR-ROM. Defaults to `!CHR_SIZE 1`.
 
-Syntax: `!CHR_SIZE <units>` or `.CHR_SIZE <multiplier> <shifts>`
+Syntax: `!CHR_SIZE <units>` or `!CHR_SIZE <multiplier> <shifts>`
 
 ### Linear Mode
 
