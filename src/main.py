@@ -6,14 +6,18 @@ from iron_assembler import Assembler
 import os
 
 def main():
-    for file in os.listdir("input"):
-        if file.endswith(".asm") or file.endswith(".s"):
-            in_fp = "input/" + file
-            break
-    else:
-        raise FileNotFoundError("Can't find source file!")
-    assembler = Assembler(in_fp)
-    assembler.assemble()
+    try:
+        for file in os.listdir("input"):
+            if file.endswith(".asm") or file.endswith(".s"):
+                in_fp = "input/" + file
+                break
+        else:
+            raise FileNotFoundError("Can't find source file!")
+        assembler = Assembler(in_fp)
+        assembler.assemble()
+        input("Success! Press [ENTER] to exit...")
+    except ValueError or FileNotFoundError:
+        input("Assembly failed; press [ENTER] to exit...")
 
 
 if __name__ == "__main__":
