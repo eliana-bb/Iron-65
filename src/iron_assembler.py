@@ -3,6 +3,7 @@ import iron_token
 import iron_parser
 from number_reader import read
 import os
+from typing import Union
 
 
 class Assembler:
@@ -89,32 +90,53 @@ class VirtualCartridge:
 		config_args = config_str.upper().strip().split(" ")
 		match config_args[0]:
 			case "!OUT_FILE":
+				self.arg_count_validate(config_args, 1)
 				self.out_file = config_args[1]
 			case "!CHR_FILE":
+				self.arg_count_validate(config_args, 1)
 				self.chr_file = config_args[1]
 			case "!PRG_SIZE":
+				self.arg_count_validate(config_args, 1, 2)
 				if len(config_args) == 2:
+					self.range_validate(config_args, 1, 0xEFF)
 					self.prg_size = [read(config_args[1])]
 				else:
+					self.set_validate(config_args, 1, [1, 3, 5, 7])
+					self.range_validate(config_args, 2, 63)
 					self.prg_size = [read(config_args[1]), read(config_args[2])]
 			case "!CHR_SIZE":
+				self.arg_count_validate(config_args, 1, 2)
 				if len(config_args) == 2:
+					self.range_validate(config_args, 1, 0xEFF)
 					self.chr_size = [read(config_args[1])]
 				else:
+					self.set_validate(config_args, 1, [1, 3, 5, 7])
+					self.range_validate(config_args, 2, 63)
 					self.chr_size = [read(config_args[1]), read(config_args[2])]
 			case "!MIRROR_MODE":
+				self.arg_count_validate(config_args, 1)
+				self.set_validate(config_args, 1, self._NAMETABLE_MIRROR_MODES)
 				self.mirror_mode = self._NAMETABLE_MIRROR_MODES[config_args[1]]
 			case "!BATTERY":
-				self.battery = (config_args[1] == "TRUE")
+				self.arg_count_validate(config_args, 1)
+				self.set_validate(config_args, 1, ["TRUE", "FALSE"])
+				self.battery = config_args[1] == "TRUE"
 			case "!TRAINER":
+				self.arg_count_validate(config_args, 1)
 				self.trainer = "" if config_args[1] == "FALSE" else config_args[1]
 			case "!CONSOLE_TYPE":
+				self.arg_count_validate(config_args, 1, 3)
+				self.set_validate(config_args, 1, self._CONSOLE_TYPES)
 				console_type = self._CONSOLE_TYPES[config_args[1]]
 				if console_type == 1:
+					self.arg_count_validate(config_args, 3)
+					self.set_validate(config_args, 2, self._VS_SYSTEM_PPUS)
+					self.set_validate(config_args, 3, self._VS_SYSTEM_HTYPES)
 					self.byte_13 = (
-							self._VS_SYSTEM_PPUS[config_args[2]] |
-							self._VS_SYSTEM_HTYPES[config_args[3]]
+							self._VS_SYSTEM_PPUS[config_args[2]] | self._VS_SYSTEM_HTYPES[config_args[3]]
 					)
+				else:
+					self.arg_count_validate(config_args, 1)
 				if console_type >= 3:
 					self.console_type_7 = 3
 					self.byte_13 = console_type
@@ -122,25 +144,41 @@ class VirtualCartridge:
 					self.console_type_7 = console_type
 					self.byte_13 = 0
 			case "!MAPPER":
+				self.arg_count_validate(config_args, 1, 2)
+				self.range_validate(config_args, 1, 0xFFF)
 				self.mapper[0] = read(config_args[1])
 				if len(config_args) == 3:
+					self.range_validate(config_args, 2, 15)
 					self.mapper[1] = read(config_args[2])
 			case "!PRG_RAM_SIZE":
+				self.arg_count_validate(config_args, 1)
+				self.range_validate(config_args, 1, 15)
 				self.prg_ram_shifts = read(config_args[1])
 			case "!PRG_NVRAM_SIZE":
+				self.arg_count_validate(config_args, 1)
+				self.range_validate(config_args, 1, 15)
 				self.prg_nvram_shifts = read(config_args[1])
 			case "!CHR_RAM_SIZE":
+				self.arg_count_validate(config_args, 1)
+				self.range_validate(config_args, 1, 15)
 				self.chr_ram_shifts = read(config_args[1])
 			case "!CHR_NVRAM_SIZE":
+				self.arg_count_validate(config_args, 1)
+				self.range_validate(config_args, 1, 15)
 				self.chr_nvram_shifts = read(config_args[1])
 			case "!REGION":
+				self.arg_count_validate(config_args, 1)
+				self.set_validate(config_args, 1, self._REGIONS)
 				self.region = self._REGIONS[config_args[1]]
 			case "!MISC_ROMS":
+				self.arg_count_validate(config_args, 1, 4)
 				if config_args[1] == "FALSE":
 					self.misc_roms = []
 				else:
 					self.misc_roms = config_args[1:]
 			case "!DEFAULT_DEVICE":
+				self.arg_count_validate(config_args, 1)
+				self.range_validate(config_args, 1, 0x3A)
 				self.default_device = read(config_args[1])
 
 	def initialize_prg(self) -> None:
@@ -215,3 +253,42 @@ class VirtualCartridge:
 			for misc_rom in self.misc_roms:
 				with open("input/" + misc_rom, mode="rb") as misc_file:
 					out_file.write(misc_file.read())
+
+	@staticmethod
+	def arg_count_validate(args: list[str], min_val: int, max_val: Union[int, None] = None) -> None:
+		arg_count = len(args) - 1
+		if max_val is None:
+			if arg_count < min_val:
+				raise ValueError(f"Not enough arguments for {args[0]}; Expects exactly {min_val}.")
+			elif arg_count > min_val:
+				raise ValueError(f"Too many arguments for {args[0]}; Expects exactly {min_val}.")
+			else:
+				return
+		else:
+			if arg_count < min_val:
+				raise ValueError(f"Not enough arguments for {args[0]}; Expects at least {min_val}.")
+			elif arg_count > max_val:
+				raise ValueError(f"Too many arguments for {args[0]}; Expects at most {max_val}.")
+			else:
+				return
+
+	@staticmethod
+	def range_validate(args: list[str], index: int, max_val: int, min_val: int = 0) -> None:
+		test_val = read(args[index])
+		if test_val < min_val or test_val > max_val:
+			raise ValueError(
+				f"Invalid value [{args[index]}] for argument {index} of {args[0]};" +
+				" should be between {min_val} and {max_val}.")
+		else:
+			return
+
+	@staticmethod
+	def set_validate(args: list[str], index: int, valid_values: Union[list, tuple, dict]) -> None:
+		if isinstance(valid_values, dict):
+			valid_values = list(valid_values.keys())
+		test_val = args[index]
+		if test_val not in valid_values:
+			raise ValueError(
+				f"Invalid value [{test_val}] for argument {index} of {args[0]}; should be one of " +
+				str(valid_values)[1:-1]
+			)
